@@ -27,12 +27,21 @@ target_board_platform_cc_library_shared {
         "gr_buf_mgr.cpp",
         "gr_device_impl.cpp",
     ],
+    include_dirs: select(soong_config_variable("qtidisplay", "target_kernel_version"), {
+        "4.14": ["system/memory/libion/kernel-headers"],
+        "4.19": ["system/memory/libion/kernel-headers"],
+        default: [],
+    }),
     shared_libs: [
         "libqdMetaData",
         "libsync",
         "libgrallocutils",
         "android.hardware.graphics.common@1.1",
-    ],
+    ] + select(soong_config_variable("qtidisplay", "target_kernel_version"), {
+        "4.14": ["libion"],
+        "4.19": ["libion"],
+        default: [],
+    }),
     cflags: [
         "-DLOG_TAG=\"qdgralloc\"",
     ],
