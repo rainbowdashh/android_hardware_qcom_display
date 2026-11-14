@@ -31,24 +31,30 @@ using std::map;
 
 class EGLImageWrapper {
  private:
-  class DeleteEGLImageCallback : public android::OnEntryRemoved<int, EGLImageBuffer*> {
+#ifndef TARGET_ION_ABI_VERSION
+  using BufferKey = int;
+#else
+  using BufferKey = uint64_t;
+#endif
+
+  class DeleteEGLImageCallback : public android::OnEntryRemoved<BufferKey, EGLImageBuffer*> {
    public:
-     explicit DeleteEGLImageCallback(map<string, int>* mapPtr) { buffStrbuffIntMapPtr = mapPtr; }
-     void operator()(int& buffInt, EGLImageBuffer*& eglImage);
-     map<string, int>* buffStrbuffIntMapPtr = nullptr;
+     explicit DeleteEGLImageCallback(map<string, BufferKey>* mapPtr) { buffStrbuffIntMapPtr = mapPtr; }
+     void operator()(BufferKey& buffInt, EGLImageBuffer*& eglImage);
+     map<string, BufferKey>* buffStrbuffIntMapPtr = nullptr;
      bool mapClearPending = false;
    #ifndef TARGET_ION_ABI_VERSION
      int ion_fd = -1;
    #endif
   };
 
-  android::LruCache<int, EGLImageBuffer *>* eglImageBufferCache;
-  map<string, int> buffStrbuffIntMap = {};
+  android::LruCache<BufferKey, EGLImageBuffer *>* eglImageBufferCache;
+  map<string, BufferKey> buffStrbuffIntMap = {};
   DeleteEGLImageCallback* callback = 0;
  #ifndef TARGET_ION_ABI_VERSION
    int ion_fd = -1;
  #else
-   uint64_t buffInt = 0;
+   BufferKey buffInt = 0;
  #endif
 
  public:

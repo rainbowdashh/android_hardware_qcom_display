@@ -83,7 +83,7 @@ static string get_ion_buff_str(int buff_fd)
 #endif
 
 //-----------------------------------------------------------------------------
-void EGLImageWrapper::DeleteEGLImageCallback::operator()(int& buffInt, EGLImageBuffer*& eglImage)
+void EGLImageWrapper::DeleteEGLImageCallback::operator()(BufferKey& buffInt, EGLImageBuffer*& eglImage)
 //-----------------------------------------------------------------------------
 {
   if (eglImage != 0) {
@@ -108,7 +108,7 @@ void EGLImageWrapper::DeleteEGLImageCallback::operator()(int& buffInt, EGLImageB
 EGLImageWrapper::EGLImageWrapper()
 //-----------------------------------------------------------------------------
 {
-  eglImageBufferCache = new android::LruCache<int, EGLImageBuffer*>(32);
+  eglImageBufferCache = new android::LruCache<BufferKey, EGLImageBuffer*>(32);
   callback = new DeleteEGLImageCallback(&buffStrbuffIntMap);
   eglImageBufferCache->setOnEntryRemovedListener(callback);
 
@@ -195,7 +195,7 @@ EGLImageBuffer *EGLImageWrapper::wrap(const void *pvt_handle)
       eglImage = eglImageBufferCache->get(it->second);
     } else {
         eglImage = L_wrap(src);
-        buffStrbuffIntMap.insert(pair<string, int>(buffStr, buffInt));
+        buffStrbuffIntMap.insert(pair<string, BufferKey>(buffStr, buffInt));
         eglImageBufferCache->put(buffInt, eglImage);
         buffInt++;
     }
